@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMV Studio — Revit Automation Tools</title>
+<meta name="description" content="Dynamo tools that delete repetitive Revit work. Sheet creation, parameter batch-setting, room data export, model QA. Built and tested by a practising BIM coordinator.">
+<meta property="og:title" content="Revit Automation Tools — BMV Studio">
+<meta property="og:description" content="Dynamo graphs that delete repetitive Revit work. No add-ins, no packages. Revit 2024–2026.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --ink:#0f1720; --ink-2:#43526a; --ink-3:#6b7a91;
+    --paper:#f6f7f9; --card:#fff; --line:#e2e6ec;
+    --accent:#0e7c94; --accent-soft:#e6f4f7; --gold:#b26a00;
+    --sans:"Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    --mono:"Cascadia Mono",Consolas,ui-monospace,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --ink:#e8edf4; --ink-2:#9dabc0; --ink-3:#7b8ba3;
+           --paper:#0d1117; --card:#141b24; --line:#232c38;
+           --accent:#4fc9e3; --accent-soft:#11303a; --gold:#e0a44a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1.25rem}
+  a{color:var(--accent)}
+
+  header{padding:3.5rem 0 2rem;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.22em;
+           text-transform:uppercase;color:var(--ink-3);margin:0 0 .9rem}
+  h1{font-size:clamp(1.9rem,5vw,2.9rem);line-height:1.08;letter-spacing:-.03em;
+     margin:0 0 .9rem;text-wrap:balance;font-weight:680}
+  .lede{font-size:clamp(1rem,2.1vw,1.15rem);color:var(--ink-2);max-width:46ch;
+        margin:0 auto 1.4rem}
+  .trust{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;
+         font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--ink-3)}
+  .trust b{color:var(--accent);font-weight:500}
+
+  .bundle{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;
+          padding:1.5rem;margin:2.5rem 0 1.5rem;display:flex;gap:1.5rem;
+          align-items:center;flex-wrap:wrap}
+  .bundle .txt{flex:1;min-width:15rem}
+  .bundle h2{font-size:1.25rem;margin:0 0 .35rem;letter-spacing:-.01em}
+  .bundle p{margin:0;color:var(--ink-2);font-size:.94rem}
+  .bundle .price{text-align:right}
+  .bundle .was{font-size:.85rem;color:var(--ink-3);text-decoration:line-through}
+  .bundle .now{font-size:2rem;font-weight:700;letter-spacing:-.02em;line-height:1}
+
+  h2.sec{font-size:.72rem;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;
+         color:var(--ink-3);margin:3rem 0 1.2rem;font-weight:500;
+         border-bottom:1px solid var(--line);padding-bottom:.6rem}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:1rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;
+        padding:1.3rem;display:flex;flex-direction:column;gap:.6rem}
+  .card h3{font-size:1.05rem;margin:0;letter-spacing:-.01em}
+  .card .what{font-size:.92rem;color:var(--ink-2);margin:0;flex:1}
+  .card .pain{font-size:.84rem;color:var(--ink-3);margin:0;font-style:italic}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+       margin-top:.3rem;padding-top:.75rem;border-top:1px solid var(--line)}
+  .amt{font-size:1.3rem;font-weight:700;letter-spacing:-.02em}
+  .buy{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+       padding:.55rem 1.1rem;border-radius:7px;font-weight:600;font-size:.88rem;
+       transition:150ms ease;white-space:nowrap}
+  .buy:hover{filter:brightness(1.09)}
+  .buy:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;
+       text-transform:uppercase;color:var(--accent);background:var(--accent-soft);
+       padding:.18rem .45rem;border-radius:4px;align-self:flex-start}
+  .tag.doc{color:var(--gold);background:transparent;border:1px solid var(--gold)}
+
+  .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:1rem}
+  .how div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.1rem}
+  .how b{display:block;font-size:.95rem;margin-bottom:.3rem}
+  .how span{font-size:.88rem;color:var(--ink-2)}
+  .n{font-family:var(--mono);font-size:.7rem;color:var(--accent);display:block;margin-bottom:.4rem}
+
+  details{background:var(--card);border:1px solid var(--line);border-radius:9px;
+          padding:.9rem 1.1rem;margin-bottom:.6rem}
+  summary{cursor:pointer;font-weight:600;font-size:.95rem}
+  details p{margin:.7rem 0 0;font-size:.92rem;color:var(--ink-2)}
+
+  footer{margin-top:4rem;padding:2rem 0 3.5rem;border-top:1px solid var(--line);
+         color:var(--ink-3);font-size:.85rem;text-align:center}
+  .note{font-size:.82rem;color:var(--ink-3);max-width:60ch;margin:1rem auto 0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">BMV Studio</p>
+    <h1>Revit work that shouldn't take all afternoon.</h1>
+    <p class="lede">Dynamo tools that delete the repetitive jobs — sheet sets, parameter updates, data exports, model QA. Built for my own production work, then tested until they stopped surprising me.</p>
+    <div class="trust">
+      <span><b>✓</b> Revit 2024–2026</span>
+      <span><b>✓</b> No add-ins to install</span>
+      <span><b>✓</b> Tested in live models</span>
+      <span><b>✓</b> Instant download</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="bundle">
+    <div class="txt">
+      <h2>Complete Automation Pack</h2>
+      <p>All six Dynamo tools plus both document packs. Everything below, one download.</p>
+    </div>
+    <div class="price">
+      <div class="was">$63 separately</div>
+      <div class="now">$39</div>
+      <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Complete%20Automation%20Pack%20%2439&amp;body=I'd%20like%20the%20Complete%20Automation%20Pack.%20Please%20send%20payment%20details." style="margin-top:.6rem">Get the bundle</a>
+    </div>
+  </div>
+
+  <h2 class="sec">Dynamo tools</h2>
+  <div class="grid">
+
+    <div class="card">
+      <span class="tag">Sheets</span>
+      <h3>Sheet Factory</h3>
+      <p class="what">Creates every sheet from a CSV list, assigns titleblocks, and skips numbers that already exist instead of duplicating them.</p>
+      <p class="pain">"200 sheets, one at a time, before anyone can draw."</p>
+      <div class="row"><span class="amt">$9</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Sheet%20Factory%20%249&amp;body=I'd%20like%20Sheet%20Factory.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">Data</span>
+      <h3>Parameter Filler</h3>
+      <p class="what">Batch-sets parameters from a spreadsheet. Never overwrites existing values, and every rejected row tells you exactly why.</p>
+      <p class="pain">"Typing the same value into 800 elements."</p>
+      <div class="row"><span class="amt">$9</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Parameter%20Filler%20%249&amp;body=I'd%20like%20Parameter%20Filler.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">Data</span>
+      <h3>Room Data Exporter</h3>
+      <p class="what">Rooms and areas to CSV with GIA totals by level. Unplaced rooms are flagged separately, so your totals stay honest.</p>
+      <p class="pain">"The area schedule doesn't match the brief."</p>
+      <div class="row"><span class="amt">$9</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Room%20Data%20Exporter%20%249&amp;body=I'd%20like%20Room%20Data%20Exporter.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">QA</span>
+      <h3>View Colorizer</h3>
+      <p class="what">Colour any view by any parameter, with an automatic legend. Uncoloured elements are your missing data — visible in seconds.</p>
+      <p class="pain">"Which rooms are missing a department?"</p>
+      <div class="row"><span class="amt">$8</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=View%20Colorizer%20%248&amp;body=I'd%20like%20View%20Colorizer.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">QA</span>
+      <h3>Warning Reporter</h3>
+      <p class="what">Every model warning to CSV with element IDs, ranked by type. Usually three warning types are 80% of the count.</p>
+      <p class="pain">"3,000 warnings and no way to sort them."</p>
+      <div class="row"><span class="amt">$7</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Warning%20Reporter%20%247&amp;body=I'd%20like%20Warning%20Reporter.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">Sheets</span>
+      <h3>Sheet Register Exporter</h3>
+      <p class="what">The full drawing register out to CSV — numbers, names, revisions, drawn/checked, issue dates. Read-only.</p>
+      <p class="pain">"Maintaining the register in two places."</p>
+      <div class="row"><span class="amt">$7</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Sheet%20Register%20Exporter%20%247&amp;body=I'd%20like%20Sheet%20Register%20Exporter.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+  </div>
+
+  <h2 class="sec">Document packs</h2>
+  <div class="grid">
+
+    <div class="card">
+      <span class="tag doc">Checklists</span>
+      <h3>BIM QA Checklist Pack</h3>
+      <p class="what">Three checklists: model QA, drawing issue, and site inspection. Sign-off lines make each run an auditable record.</p>
+      <p class="pain">"Every revision cloud started as a skipped check."</p>
+      <div class="row"><span class="amt">$8</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=BIM%20QA%20Checklist%20Pack%20%248&amp;body=I'd%20like%20the%20BIM%20QA%20Checklist%20Pack.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+    <div class="card">
+      <span class="tag doc">Prompts</span>
+      <h3>50 AI Prompts for Revit Users</h3>
+      <p class="what">Field-tested prompts across automation, QA, families, documentation and career. Every one has brackets showing what to fill in.</p>
+      <p class="pain">"AI writes terrible Dynamo scripts."</p>
+      <div class="row"><span class="amt">$7</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=50%20AI%20Prompts%20%247&amp;body=I'd%20like%20the%2050%20AI%20Prompts%20pack.%20Please%20send%20payment%20details.">Buy</a></div>
+    </div>
+
+  </div>
+
+  <h2 class="sec">Custom work</h2>
+  <div class="grid">
+    <div class="card" style="grid-column:1/-1">
+      <span class="tag">Built to order</span>
+      <h3>Your specific repetitive task</h3>
+      <p class="what">Describe the job you keep doing by hand. I'll tell you honestly whether it's worth automating — sometimes the answer is no, and that's a useful answer too. Single scripts from $75; spreadsheet-driven tools from $150.</p>
+      <div class="row"><span class="amt">from $75</span>
+        <a class="buy" href="mailto:vekariabhav@gmail.com?subject=Custom%20Revit%20automation%20enquiry&amp;body=The%20task%20I%20keep%20doing%20by%20hand%20is%3A%0A%0AMy%20Revit%20version%20is%3A">Describe your task</a></div>
+    </div>
+  </div>
+
+  <h2 class="sec">How it works</h2>
+  <div class="how">
+    <div><span class="n">01</span><b>Pick a tool</b><span>Email arrives with your choice. I reply with a payment link, usually within a few hours.</span></div>
+    <div><span class="n">02</span><b>Pay securely</b><span>Card or bank transfer through Payoneer. No account needed on your side.</span></div>
+    <div><span class="n">03</span><b>Get the files</b><span>The .dyn graph, a README with 3-step instructions, and sample data to test on.</span></div>
+    <div><span class="n">04</span><b>Run it</b><span>Open in Dynamo, wire one input, press Run. Free updates for life.</span></div>
+  </div>
+
+  <h2 class="sec">Questions</h2>
+
+  <details><summary>Do I need to install anything?</summary>
+    <p>No. Every tool is a plain <code>.dyn</code> file that opens in the Dynamo already built into Revit. No packages, no add-in, nothing to maintain or update when Revit changes.</p></details>
+
+  <details><summary>Will it damage my model?</summary>
+    <p>Existing data is skipped by default, never silently overwritten, so running a script twice is safe. Several tools are entirely read-only. Every run returns a report of exactly what it created, what it skipped, and any errors with the reason — so you can verify before saving. Test on a copy the first time, as with any automation.</p></details>
+
+  <details><summary>Which Revit versions?</summary>
+    <p>Revit 2024, 2025 and 2026, using Dynamo 2.x with the IronPython2 engine. If you're on an older version, email me before buying and I'll tell you honestly whether it will work.</p></details>
+
+  <details><summary>What if it doesn't work for me?</summary>
+    <p>Send me the exact text from the OUT port and your Revit version. The report is written to be diagnostic, so that usually tells me the cause in one read, and I'll fix it. If it genuinely can't do what you needed, I'll refund it.</p></details>
+
+  <details><summary>Who made these?</summary>
+    <p>I'm Bhavik Vekaria, a practising architect and BIM coordinator with 9 years in Revit production. I wrote these because I needed them myself — which is why they skip existing data rather than overwriting it, and why the error messages tell you something useful.</p></details>
+
+  <p class="note">Independent practice. Not affiliated with or endorsed by Autodesk. Personal-use licence: use on unlimited projects within your organisation; don't resell or redistribute.</p>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    BMV Studio — independent Revit &amp; BIM automation<br>
+    <a href="mailto:vekariabhav@gmail.com">vekariabhav@gmail.com</a>
+  </div>
+</footer>
+
+</body>
+</html>
