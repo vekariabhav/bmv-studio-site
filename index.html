@@ -91,20 +91,22 @@
         text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;
         padding:.55rem .3rem 0;border-top:1px solid var(--line-2);margin-top:.5rem}
   .plate svg{display:block;width:100%;height:auto}
-  .dr{stroke:var(--cyan);fill:none;stroke-width:1.6;
-      stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
-      animation:draw 2.6s cubic-bezier(.5,0,.2,1) forwards}
-  .dim{stroke:var(--amber);stroke-width:1;opacity:0;animation:fade .7s ease 1.9s forwards}
+  /* Drawn state is the DEFAULT - if the animation never runs (headless render,
+     reduced motion, older engine) the plan is still fully visible. The reveal is
+     layered on top only where motion is welcome. */
+  .dr{stroke:var(--cyan);fill:none;stroke-width:1.6}
+  .dim{stroke:var(--amber);stroke-width:1;opacity:.9}
   .gridline{stroke:var(--line);stroke-width:.6}
-  .fillroom{fill:var(--cyan);opacity:0;animation:fade .8s ease 2.2s forwards}
-  @keyframes draw{to{stroke-dashoffset:0}}
-  @keyframes fade{to{opacity:.16}}
-  .dim{animation-name:fadeFull}
-  @keyframes fadeFull{to{opacity:.9}}
-  @media(prefers-reduced-motion:reduce){
-    .dr{animation:none;stroke-dashoffset:0}
-    .dim{animation:none;opacity:.9}
-    .fillroom{animation:none;opacity:.16}
+  .fillroom{fill:var(--cyan);opacity:.16}
+
+  @media(prefers-reduced-motion:no-preference){
+    .dr{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+        animation:draw 2.6s cubic-bezier(.5,0,.2,1) forwards}
+    .dim{opacity:0;animation:fadeFull .7s ease 1.9s forwards}
+    .fillroom{opacity:0;animation:fade .8s ease 2.2s forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    @keyframes fade{to{opacity:.16}}
+    @keyframes fadeFull{to{opacity:.9}}
   }
 
   /* ── sections ── */
