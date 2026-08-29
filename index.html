@@ -3,101 +3,270 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BMV Studio — Revit &amp; BIM Automation</title>
-<meta name="description" content="Independent Revit and BIM automation. Dynamo scripts that delete repetitive modelling work, built by a practising architect and BIM coordinator with 9 years in production.">
-<meta property="og:title" content="BMV Studio — Revit &amp; BIM Automation">
-<meta property="og:description" content="Dynamo scripts that delete repetitive Revit work. Built by a practising architect and BIM coordinator.">
+<title>BMV Studio — Revit Automation</title>
+<meta name="description" content="Dynamo tools that delete repetitive Revit work. Sheet sets from spreadsheets, batch parameter edits, model QA. Built by a practising BIM coordinator, tested in live models.">
+<meta property="og:title" content="BMV Studio — Revit Automation">
+<meta property="og:description" content="Dynamo tools that delete repetitive Revit work. Revit 2024–2026. No add-ins.">
 <meta property="og:type" content="website">
 <style>
   :root{
-    --ink:#0f1720; --ink-2:#43526a; --ink-3:#6b7a91;
-    --paper:#f6f7f9; --card:#fff; --line:#e2e6ec;
-    --accent:#0e7c94; --accent-soft:#e6f4f7;
-    --sans:"Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    --ink:#0b1622; --ink-2:#41556e; --ink-3:#6b7f96;
+    --paper:#f4f6f8; --card:#fff; --line:#dfe5ec; --line-2:#eef2f6;
+    --blue:#0d5f7a;        /* drafting ink */
+    --cyan:#0e8ba8;        /* linework */
+    --amber:#b4560f;       /* trace-paper accent, CTA */
+    --amber-soft:#fdf1e7;
+    --cyan-soft:#e6f3f7;
+    --grid:rgba(13,95,122,.07);
+    --sans:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
     --mono:"Cascadia Mono",Consolas,ui-monospace,Menlo,monospace;
   }
   @media (prefers-color-scheme:dark){
-    :root{ --ink:#e8edf4; --ink-2:#9dabc0; --ink-3:#7b8ba3;
-           --paper:#0d1117; --card:#141b24; --line:#232c38;
-           --accent:#4fc9e3; --accent-soft:#11303a; }
+    :root{
+      --ink:#e9eef5; --ink-2:#9db0c6; --ink-3:#7188a1;
+      --paper:#0a1119; --card:#111b26; --line:#1e2c3a; --line-2:#16222e;
+      --blue:#4fbde0; --cyan:#3fb2d6; --amber:#f0954a; --amber-soft:#2a1a0e;
+      --cyan-soft:#0d2530; --grid:rgba(79,189,224,.09);
+    }
   }
   *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
-       line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:52rem;margin:0 auto;padding:0 1.25rem}
-  a{color:var(--accent)}
+       line-height:1.62;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 1.4rem}
+  a{color:var(--cyan)}
 
-  header{padding:4.5rem 0 3rem;border-bottom:1px solid var(--line)}
-  .eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.22em;
-           text-transform:uppercase;color:var(--ink-3);margin:0 0 1rem}
-  h1{font-size:clamp(2rem,5.5vw,3.1rem);line-height:1.08;letter-spacing:-.03em;
-     margin:0 0 1rem;text-wrap:balance;font-weight:680}
-  .lede{font-size:clamp(1.05rem,2.2vw,1.2rem);color:var(--ink-2);
-        max-width:38ch;margin:0 0 2rem}
-  .cta{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);
-       color:#fff;text-decoration:none;padding:.8rem 1.4rem;border-radius:7px;
-       font-weight:600;font-size:.95rem;transition:150ms ease}
-  .cta:hover{filter:brightness(1.08)}
-  .cta:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-  .sub-cta{margin-left:1rem;color:var(--ink-2);font-size:.9rem}
+  /* ── nav ── */
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);
+      background:color-mix(in srgb,var(--paper) 86%,transparent);
+      border-bottom:1px solid var(--line)}
+  .navin{max-width:64rem;margin:0 auto;padding:.85rem 1.4rem;display:flex;align-items:center;gap:1rem}
+  .brand{display:flex;align-items:center;gap:.6rem;font-weight:700;letter-spacing:-.02em;
+         text-decoration:none;color:var(--ink);font-size:1.02rem}
+  .brand svg{width:26px;height:26px;color:var(--cyan)}
+  .navcta{margin-left:auto;display:flex;gap:.6rem;align-items:center}
+  .navlink{font-size:.9rem;color:var(--ink-2);text-decoration:none}
+  .navlink:hover{color:var(--cyan)}
 
-  section{padding:3.25rem 0;border-bottom:1px solid var(--line)}
-  h2{font-size:.72rem;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;
-     color:var(--ink-3);margin:0 0 1.5rem;font-weight:500}
-  h3{font-size:1.05rem;margin:0 0 .35rem;letter-spacing:-.01em}
-  p{margin:0 0 1rem;max-width:62ch}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.25rem}
-  .card p{font-size:.92rem;color:var(--ink-2);margin:0}
-  .tag{display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;
-       text-transform:uppercase;color:var(--accent);background:var(--accent-soft);
-       padding:.2rem .5rem;border-radius:4px;margin-bottom:.6rem}
+  /* ── hero ── */
+  header{position:relative;overflow:hidden;padding:4.5rem 0 3.5rem;
+         border-bottom:1px solid var(--line)}
+  header::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px;
+    mask-image:radial-gradient(ellipse 75% 70% at 60% 40%,#000 35%,transparent 78%);
+    -webkit-mask-image:radial-gradient(ellipse 75% 70% at 60% 40%,#000 35%,transparent 78%)}
+  .hero{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:2.5rem;align-items:center}
+  @media(max-width:820px){.hero{grid-template-columns:1fr;gap:2rem}}
 
-  ul.plain{list-style:none;padding:0;margin:0;display:grid;gap:.65rem}
-  ul.plain li{padding-left:1.4rem;position:relative;color:var(--ink-2);font-size:.95rem}
-  ul.plain li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;
-                      border-radius:50%;background:var(--accent)}
+  .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);
+           font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);
+           background:var(--cyan-soft);border:1px solid color-mix(in srgb,var(--cyan) 25%,transparent);
+           padding:.32rem .7rem;border-radius:999px;margin:0 0 1.1rem}
+  .eyebrow b{width:6px;height:6px;border-radius:50%;background:var(--cyan)}
+  h1{font-size:clamp(2.15rem,5.6vw,3.5rem);line-height:1.03;letter-spacing:-.038em;
+     margin:0 0 1rem;text-wrap:balance;font-weight:800}
+  h1 em{font-style:normal;color:var(--cyan);position:relative;white-space:nowrap}
+  h1 em::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:.16em;
+               background:var(--amber);opacity:.32;border-radius:2px}
+  .lede{font-size:clamp(1.02rem,2.1vw,1.17rem);color:var(--ink-2);max-width:40ch;margin:0 0 1.7rem}
+  .cta-row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:650;
+       font-size:.95rem;padding:.82rem 1.35rem;border-radius:9px;transition:160ms ease}
+  .btn-1{background:var(--amber);color:#fff;box-shadow:0 6px 18px -8px var(--amber)}
+  .btn-1:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-2{border:1px solid var(--line);color:var(--ink);background:var(--card)}
+  .btn-2:hover{border-color:var(--cyan);color:var(--cyan)}
+  .btn:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+  .micro{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);margin-top:1.1rem;
+         display:flex;gap:1.1rem;flex-wrap:wrap}
+  .micro span{display:flex;align-items:center;gap:.35rem}
+  .micro svg{width:13px;height:13px;color:var(--cyan)}
 
-  footer{padding:2.5rem 0 4rem;color:var(--ink-3);font-size:.85rem}
-  footer a{color:var(--ink-2)}
-  .note{font-size:.82rem;color:var(--ink-3);max-width:60ch}
+  /* hero drawing */
+  .plate{position:relative;background:var(--card);border:1px solid var(--line);
+         border-radius:12px;padding:.9rem;box-shadow:0 22px 50px -30px rgba(11,22,34,.5)}
+  .plate figcaption{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+        text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;
+        padding:.55rem .3rem 0;border-top:1px solid var(--line-2);margin-top:.5rem}
+  .plate svg{display:block;width:100%;height:auto}
+  .dr{stroke:var(--cyan);fill:none;stroke-width:1.6;
+      stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+      animation:draw 2.6s cubic-bezier(.5,0,.2,1) forwards}
+  .dim{stroke:var(--amber);stroke-width:1;opacity:0;animation:fade .7s ease 1.9s forwards}
+  .gridline{stroke:var(--line);stroke-width:.6}
+  .fillroom{fill:var(--cyan);opacity:0;animation:fade .8s ease 2.2s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes fade{to{opacity:.16}}
+  .dim{animation-name:fadeFull}
+  @keyframes fadeFull{to{opacity:.9}}
+  @media(prefers-reduced-motion:reduce){
+    .dr{animation:none;stroke-dashoffset:0}
+    .dim{animation:none;opacity:.9}
+    .fillroom{animation:none;opacity:.16}
+  }
+
+  /* ── sections ── */
+  section{padding:4rem 0;border-bottom:1px solid var(--line)}
+  .sechead{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+           color:var(--ink-3);margin:0 0 .5rem}
+  h2{font-size:clamp(1.5rem,3.4vw,2.1rem);letter-spacing:-.03em;margin:0 0 .7rem;
+     text-wrap:balance;font-weight:750}
+  .sub{color:var(--ink-2);max-width:52ch;margin:0 0 2.2rem}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(16.5rem,1fr));gap:1rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.4rem;
+        transition:180ms ease;position:relative;overflow:hidden}
+  .card:hover{border-color:color-mix(in srgb,var(--cyan) 45%,transparent);
+              transform:translateY(-2px);box-shadow:0 14px 30px -22px rgba(11,22,34,.55)}
+  .ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;
+       background:var(--cyan-soft);color:var(--cyan);margin-bottom:.9rem}
+  .ico svg{width:21px;height:21px}
+  .card h3{font-size:1.06rem;margin:0 0 .35rem;letter-spacing:-.012em}
+  .card p{margin:0;font-size:.93rem;color:var(--ink-2)}
+  .card .quote{margin-top:.7rem;font-size:.85rem;color:var(--ink-3);font-style:italic;
+               padding-top:.7rem;border-top:1px solid var(--line-2)}
+
+  /* proof strip */
+  .proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:1px;
+         background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .proof div{background:var(--card);padding:1.3rem 1rem;text-align:center}
+  .proof b{display:block;font-size:1.75rem;font-weight:780;letter-spacing:-.03em;color:var(--cyan);
+           font-variant-numeric:tabular-nums}
+  .proof span{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;
+              text-transform:uppercase;color:var(--ink-3)}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:1.1rem;counter-reset:s}
+  .step{counter-increment:s;position:relative;padding-left:2.6rem}
+  .step::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:-.1rem;
+        font-family:var(--mono);font-size:.78rem;color:var(--amber);font-weight:600;
+        border:1px solid var(--amber);border-radius:6px;padding:.18rem .38rem}
+  .step b{display:block;font-size:1rem;margin-bottom:.25rem}
+  .step span{font-size:.9rem;color:var(--ink-2)}
+
+  /* closing cta */
+  .final{text-align:center;padding:4.5rem 0;border-bottom:0}
+  .final h2{margin-bottom:.8rem}
+  .final .sub{margin:0 auto 1.8rem}
+
+  footer{padding:2rem 0 3rem;color:var(--ink-3);font-size:.85rem;text-align:center}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <p class="eyebrow">BMV Studio · Independent</p>
-    <h1>Revit work that shouldn't take all afternoon.</h1>
-    <p class="lede">I build Dynamo automation for architects and BIM teams — the boring, repetitive jobs that eat a day and should take thirty seconds.</p>
-    <a class="cta" href="mailto:vekariabhav@gmail.com?subject=Revit%20automation%20enquiry">Get in touch</a>
-    <span class="sub-cta">Usually reply same day</span>
+<nav>
+  <div class="navin">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 21 L12 3 L21 21 Z"/><path d="M7.5 14 h9"/>
+      </svg>BMV Studio
+    </a>
+    <div class="navcta">
+      <a class="navlink" href="#tools">Tools</a>
+      <a class="btn btn-1" href="store.html" style="padding:.55rem 1rem;font-size:.88rem">View tools</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top">
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow"><b></b>Revit 2024–2026 · Dynamo</p>
+      <h1>Revit work that shouldn't take <em>all afternoon</em>.</h1>
+      <p class="lede">Dynamo tools that delete the repetitive jobs — sheet sets, parameter updates, data exports, model QA. Written for my own production work first, then tested until they stopped surprising me.</p>
+      <div class="cta-row">
+        <a class="btn btn-1" href="store.html">
+          Browse the tools
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-2" href="mailto:vekariabhav@gmail.com?subject=Custom%20Revit%20automation">Describe your task</a>
+      </div>
+      <div class="micro">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>No add-ins to install</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Tested in live models</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Never overwrites your data</span>
+      </div>
+    </div>
+
+    <figure class="plate" style="margin:0">
+      <svg viewBox="0 0 320 236" role="img" aria-label="Drawing of a floor plan being generated automatically, with dimension lines.">
+        <g class="gridline">
+          <path d="M0 40h320M0 80h320M0 120h320M0 160h320M0 200h320"/>
+          <path d="M40 0v236M80 0v236M120 0v236M160 0v236M200 0v236M240 0v236M280 0v236"/>
+        </g>
+        <rect class="fillroom" x="46" y="60" width="104" height="76"/>
+        <rect class="fillroom" x="164" y="60" width="86" height="76"/>
+        <g class="dr" style="--len:900">
+          <rect x="40" y="54" width="216" height="128"/>
+          <path d="M156 54v128"/>
+          <path d="M40 148h216"/>
+        </g>
+        <g class="dr" style="--len:260" stroke-width="2.4">
+          <path d="M78 54v-0.5"/><path d="M40 100h0.5"/>
+        </g>
+        <g class="dim">
+          <path d="M40 36h216"/><path d="M40 31v10"/><path d="M256 31v10"/>
+          <path d="M22 54v128"/><path d="M17 54h10"/><path d="M17 182h10"/>
+        </g>
+        <g class="dr" style="--len:120" stroke-width="1.2">
+          <circle cx="98" cy="98" r="7"/><path d="M94 98h8M98 94v8"/>
+          <circle cx="207" cy="98" r="7"/><path d="M203 98h8M207 94v8"/>
+        </g>
+      </svg>
+      <figcaption><span>NEO_PLAN · GENERATED</span><span>1:100</span></figcaption>
+    </figure>
   </div>
 </header>
 
-<section>
+<section id="tools">
   <div class="wrap">
-    <h2>What I build</h2>
+    <p class="sechead">What I build</p>
+    <h2>Six jobs you should never do by hand again</h2>
+    <p class="sub">Each one is a single Dynamo graph. Open it, wire one input, press Run — and read a report of exactly what it did.</p>
+
     <div class="grid">
       <div class="card">
-        <span class="tag">Sheets &amp; documentation</span>
-        <h3>Drawing sets from a spreadsheet</h3>
-        <p>Create a hundred sheets with the right titleblocks from a CSV. Export the full drawing register with revisions and dates back out to Excel.</p>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="16" rx="1.5"/><path d="M7 4V2.5M21 8v11.5a1.5 1.5 0 0 1-1.5 1.5H8"/><path d="M6.5 9h7M6.5 13h7M6.5 17h4"/></svg></div>
+        <h3>Sheet Factory</h3>
+        <p>Creates every sheet from a CSV register, assigns titleblocks, and skips numbers that already exist rather than duplicating them.</p>
+        <p class="quote">“200 sheets, one at a time, before anyone can draw.”</p>
       </div>
+
       <div class="card">
-        <span class="tag">Data</span>
-        <h3>Parameters at scale</h3>
-        <p>Batch-set parameters from a spreadsheet without overwriting what's already there. Export room and area schedules with GIA totals by level.</p>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12M3 15h18"/><path d="M13.5 12.5 15 14l2.5-3"/></svg></div>
+        <h3>Parameter Filler</h3>
+        <p>Batch-sets parameters from a spreadsheet. Never overwrites an existing value, and every rejected row comes back with the reason.</p>
+        <p class="quote">“Typing the same value into 800 elements.”</p>
       </div>
+
       <div class="card">
-        <span class="tag">Model QA</span>
-        <h3>Find what's wrong, faster</h3>
-        <p>Colour a view by any parameter to see missing data instantly. Export every model warning to a ranked cleanup list with element IDs.</p>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z"/><path d="M6 7.5h2M16 7.5h2M6 16.5h2M16 16.5h2"/></svg></div>
+        <h3>Room Data Exporter</h3>
+        <p>Rooms and areas to CSV with GIA totals by level. Unplaced rooms are flagged separately, so your totals stay honest.</p>
+        <p class="quote">“The area schedule doesn’t match the brief.”</p>
       </div>
+
       <div class="card">
-        <span class="tag">Custom</span>
-        <h3>Your specific problem</h3>
-        <p>Most work is one-off: describe the repetitive task, and if it's scriptable I'll tell you before you commit to anything.</p>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5c0-1-1-1.5-2-1.5h-2a2 2 0 0 1 0-4h1c1 0 2-.6 2-1.7A9.4 9.4 0 0 0 12 2.5Z"/><circle cx="7.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="6.8" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="7.8" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg></div>
+        <h3>View Colorizer</h3>
+        <p>Colour any view by any parameter, with an automatic legend. Uncoloured elements are your missing data, visible in seconds.</p>
+        <p class="quote">“Which rooms are missing a department?”</p>
+      </div>
+
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.6 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4.5M12 17.2h.01"/></svg></div>
+        <h3>Warning Reporter</h3>
+        <p>Every model warning to CSV with element IDs, ranked by type. Usually three warning types are 80% of the count.</p>
+        <p class="quote">“3,000 warnings and no way to sort them.”</p>
+      </div>
+
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h16v15H4z"/><path d="M4 9h16M9 9v10.5"/><path d="M12 12.5h5M12 15.5h5"/></svg></div>
+        <h3>Sheet Register Exporter</h3>
+        <p>The full drawing register out to CSV — numbers, names, revisions, drawn/checked, issue dates. Entirely read-only.</p>
+        <p class="quote">“Maintaining the register in two places.”</p>
       </div>
     </div>
   </div>
@@ -105,38 +274,49 @@
 
 <section>
   <div class="wrap">
-    <h2>How I work</h2>
-    <ul class="plain">
-      <li><strong>Questions first.</strong> Revit version, exact categories, and whether existing data should be skipped or overwritten. Most rework comes from skipping this.</li>
-      <li><strong>Scripts that don't bite.</strong> Existing values are skipped by default, never silently overwritten, so re-running is safe.</li>
-      <li><strong>Reports, not silence.</strong> Every script returns exactly what it created, what it skipped, and any errors with the reason — so you can see what happened.</li>
-      <li><strong>Tested before delivery.</strong> Every script is run in a real Revit model before it reaches you.</li>
-      <li><strong>Plain files.</strong> A <code>.dyn</code> graph and a README. No packages to install, no add-in, nothing to maintain.</li>
-    </ul>
+    <p class="sechead">Who builds them</p>
+    <h2>Written by someone who had to issue the drawings</h2>
+    <p class="sub">I'm Bhavik Vekaria — a practising architect and BIM coordinator. These exist because I needed them on real deadlines, which is why they skip existing data instead of overwriting it, and why the errors tell you something useful.</p>
+    <div class="proof">
+      <div><b>9</b><span>Years in Revit</span></div>
+      <div><b>60+</b><span>Projects delivered</span></div>
+      <div><b>3</b><span>Countries</span></div>
+      <div><b>2024–26</b><span>Revit versions</span></div>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <h2>Who you'd be working with</h2>
-    <p>I'm Bhavik Vekaria — a practising architect and BIM coordinator with nine years in Revit production. I write these scripts because I needed them myself first.</p>
-    <p>That's the difference between automation written by a developer and automation written by someone who has actually had to issue a drawing set at 11pm: I know which shortcuts break a model, and I don't take them.</p>
-    <p class="note">Compatible with Revit 2024–2026, Dynamo 2.x. Independent practice — not affiliated with or endorsed by Autodesk, and separate from any employer.</p>
+    <p class="sechead">How it works</p>
+    <h2>Four steps, no installation</h2>
+    <p class="sub">Nothing to maintain, nothing that breaks when Revit updates.</p>
+    <div class="steps">
+      <div class="step"><b>Pick a tool</b><span>Email me which one. I reply with a payment link, usually within a few hours.</span></div>
+      <div class="step"><b>Pay securely</b><span>Card or bank transfer. No account needed on your side.</span></div>
+      <div class="step"><b>Get the files</b><span>The .dyn graph, a README, and sample data to test on.</span></div>
+      <div class="step"><b>Run it</b><span>Open in Dynamo, wire one input, press Run. Free updates for life.</span></div>
+    </div>
   </div>
 </section>
 
-<section>
+<section class="final">
   <div class="wrap">
-    <h2>Start a conversation</h2>
-    <p>Describe the task you keep doing by hand. I'll tell you honestly whether it's worth scripting — sometimes the answer is no, and that's a useful answer too.</p>
-    <a class="cta" href="mailto:vekariabhav@gmail.com?subject=Revit%20automation%20enquiry">Email me</a>
+    <h2>Tell me the task you keep repeating</h2>
+    <p class="sub">I'll tell you honestly whether it's worth automating. Sometimes the answer is no — that's a useful answer too.</p>
+    <div class="cta-row" style="justify-content:center">
+      <a class="btn btn-1" href="store.html">Browse the tools
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn-2" href="mailto:vekariabhav@gmail.com?subject=Custom%20Revit%20automation%20enquiry">Email me</a>
+    </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <p>BMV Studio — independent Revit &amp; BIM automation.<br>
-    <a href="mailto:vekariabhav@gmail.com">vekariabhav@gmail.com</a></p>
+    BMV Studio — independent Revit &amp; BIM automation<br>
+    <a href="mailto:vekariabhav@gmail.com">vekariabhav@gmail.com</a><br>
+    <span style="font-size:.78rem">Independent practice. Not affiliated with or endorsed by Autodesk.</span>
   </div>
 </footer>
 
